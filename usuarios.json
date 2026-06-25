@@ -1,0 +1,16 @@
+[
+    {
+        "id": 1,
+        "correo": "cmsalazarch@gmail.com",
+        "código_ingreso": "6a19355f13adf02fe082c17f64764df738957b7052aff3694d4aa64d8487c2bb",
+        "nombre": "Alejandro",
+        "fecha_creación": "20260624T172618"
+    },
+    {
+        "id": 2,
+        "correo": "asfaf",
+        "código_ingreso": "18c3ffe70cd59307dd77b85818fde3d42a384b84cfa8192a10ff2d6e100e4504",
+        "nombre": "asd",
+        "fecha_creación": "20260625T164650"
+    }
+]

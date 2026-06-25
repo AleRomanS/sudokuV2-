@@ -1,0 +1,11 @@
+{
+    "nivel": "dificil",
+    "reloj": "cronometro",
+    "timer": {
+        "horas": 0,
+        "minutos": 0,
+        "segundos": 0
+    },
+    "top_x": 1,
+    "elementos": "letras"
+}
