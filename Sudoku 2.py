@@ -14,7 +14,7 @@ from reportlab.pdfgen import canvas
 
 from collections import deque
 
-#imports del programa
+#imports del programa 3
 import pickle
 import hashlib
 from tkinter import simpledialog
@@ -25,7 +25,7 @@ ARCHIVO_BITACORA = "sudoku2026_bitacora_jugadas.json"
 ARCHIVO_JUEGO = "sudoku2026juegoactual.json" 
 ARCHIVO_PARTIDAS = "sudoku2026partidas.json" #Ya no se usa en el programa 3
 
-NIVELES=["facil", "intermedio", "dificil"]
+NIVELES=["facil", "intermedio", "dificil", "multinivel"]
 NUMEROS=[1,2,3,4,5,6,7,8,9]
 LETRAS=["A","B","C","D","E","F","G","H","I"]
 
@@ -65,20 +65,20 @@ class ABB:
         else:
             self.insertar_recursivo(self.raiz, nuevo_nodo)
             
-        def insertar_recursivo(self, nodo_actual, nuevo_nodo):
-            if nuevo_nodo.partida.tiempo<nodo_actual.partida.tiempo:
-                if nodo_actual.izquierdo == None:
-                    nodo_actual.izquierdo = nuevo_nodo
-                    
-                else:
-                    self.insertar_recursivo(nodo_actual.izquierdo, nuevo_nodo)
+    def insertar_recursivo(self, nodo_actual, nuevo_nodo):
+        if nuevo_nodo.partida.tiempo<nodo_actual.partida.tiempo:
+            if nodo_actual.izquierdo == None:
+                nodo_actual.izquierdo = nuevo_nodo
                     
             else:
-                if nodo_actual.derecho == None:
-                    nodo_actual.derecho = nuevo_nodo
+                self.insertar_recursivo(nodo_actual.izquierdo, nuevo_nodo)
                     
-                else:
-                    self.insertar_recursivo(nodo_actual.derecho, nuevo_nodo)
+        else:
+            if nodo_actual.derecho == None:
+                nodo_actual.derecho = nuevo_nodo
+                    
+            else:
+                self.insertar_recursivo(nodo_actual.derecho, nuevo_nodo)
 
     def recorrer_arbol(self):
         resultado = []
@@ -175,12 +175,15 @@ def jugar(): #Función base y pilar de toda la partida
             btn = tk.Button(frame_tablero, text="", width=4, height=2, bg="gray90")
             btn.grid(row=i, column=j)
 
+    #Caso de multinivel del Programa 3
+    caso_multinivel = tk.StringVar()
+    caso_multinivel.set("facil")
 
     #Sección de botones 
     btn_iniciar = tk.Button(frame_derecho, text="INICIAR JUEGO", bg="red", fg="white", font=("Arial", 12, "bold"),
                             command=lambda: iniciar_juego(nivel, frame_tablero, entry_jugador, juego_iniciado, numero_seleccionado,
                                                           pila_realizadas, pila_eliminadas, tablero, partida_actual, botones_tablero,
-                                                          cronometro_activo, cronometro, segundos, elemento_panel))
+                                                          cronometro_activo, cronometro, segundos, elemento_panel, caso_multinivel))
     btn_iniciar.grid(row=5, column=0, pady=10)
 
 
@@ -232,7 +235,7 @@ def jugar(): #Función base y pilar de toda la partida
             segs = seg % 60
             lbl_cronometro.configure(text=f"{horas:02d}:{minutos:02d}:{segs:02d}")
             ventana_jugar.after(1000, cronometro)
-    
+
 def configurar():
     ventana_config = tk.Toplevel(ventana)
     ventana_config.title("Configurar")
@@ -360,7 +363,7 @@ def acerca_de():
 #Funciones que ayudan a las principales de antes
 def iniciar_juego(nivel, frame_tablero, entry_jugador, juego_iniciado, numero_seleccionado, #Modificada en el Programa 3
                   pila_realizadas, pila_eliminadas, tablero, partida_actual, botones_tablero, cronometro_activo,
-                  cronometro, segundos, elementos):
+                  cronometro, segundos, elementos, caso_multinivel):
     
     nombre = entry_jugador.get()
     
@@ -368,8 +371,14 @@ def iniciar_juego(nivel, frame_tablero, entry_jugador, juego_iniciado, numero_se
         messagebox.showwarning("Error", "Debe ingresar un nombre de jugador")
         return
 
+    #Caso de Multinivel
+    if nivel == "multinivel":
+        nivel_real = caso_multinivel.get()
+    else:
+        nivel_real = nivel
+    
     tablero_generado = generar_tablero(elementos)
-    quitar_casillas(tablero_generado, nivel)
+    quitar_casillas(tablero_generado, nivel_real)
 
     for i in range(9):
         for j in range(9):
@@ -393,7 +402,8 @@ def iniciar_juego(nivel, frame_tablero, entry_jugador, juego_iniciado, numero_se
                             bg="gray70" if valor != 0 else "gray90")
             botones_tablero[i][j] = btn
             btn.configure(command=lambda f=i, c=j, b=btn: colocar_numero(f, c, b, numero_seleccionado, juego_iniciado, partida_actual, tablero,
-                                                                         pila_realizadas, pila_eliminadas, botones_tablero, nombre, nivel, segundos))
+                                                                         pila_realizadas, pila_eliminadas, botones_tablero, nombre, nivel,
+                                                                         segundos, caso_multinivel, cronometro_activo, frame_tablero))
             btn.grid(row=i, column=j, padx=1, pady=1)
 
         
@@ -415,14 +425,21 @@ def seleccionar_numero(numero, btn_presionado, frame_numeros, num_selec):
     num_selec.set(numero)
 
 #Como hace el programa para añadir un número a la tabla, junto a sus validaciones (funciones hechas un poco más abajo)
-def colocar_numero(fila, columna, btn, numero_seleccionado, juego_iniciado, partida_actual, tablero,
-                   pila_realizadas, pila_eliminadas, botones_tablero, nombre, nivel, segundos):
+def colocar_numero(fila, columna, btn, numero_seleccionado, juego_iniciado, partida_actual, tablero, 
+                   pila_realizadas, pila_eliminadas, botones_tablero, nombre, nivel, segundos, caso_multinivel, cronometro_activo,
+                   frame_tablero): #Modificada en el Programa 3
+
+    if nivel == "multinivel":
+        nivel_real = caso_multinivel.get()
+    else:
+        nivel_real = nivel
+    
     posicion = f"{fila},{columna}"
     if juego_iniciado.get() == False:
         messagebox.showwarning("Error", "Inicie el juego primero")
         return
 
-    elif posicion in partida_actual:
+    elif posicion in partida_actual[0]:
         messagebox.showwarning("Error", "JUGADA NO ES VÁLIDA PORQUE ESTE ES UN ELEMENTO FIJO")
         return
 
@@ -432,6 +449,9 @@ def colocar_numero(fila, columna, btn, numero_seleccionado, juego_iniciado, part
 
     else:
         elemento = numero_seleccionado.get()
+        if elemento.isdigit():
+            elemento = int(elemento)
+            
         if not validar_fila(tablero, fila, elemento):
             messagebox.showwarning("Error", "JUGADA NO ES VÁLIDA PORQUE EL ELEMENTO YA ESTÁ EN LA FILA")
             return
@@ -449,8 +469,19 @@ def colocar_numero(fila, columna, btn, numero_seleccionado, juego_iniciado, part
 
             if all(tablero[i][j] != 0 for i in range(9) for j in range(9)):
                 messagebox.showinfo("¡Felicidades!", "¡EXCELENTE! JUEGO COMPLETADO")
-                guardar_en_bitacora(nombre, nivel, segundos.get())
+                guardar_en_bitacora(nombre, nivel_real, segundos.get())
                 cronometro_activo.set(False)
+                if nivel == "multinivel":
+                    nuevo_nivel = avanzar_nivel(caso_multinivel)
+                    messagebox.showinfo("Multinivel", f"¡Avanzaste al nivel {nuevo_nivel.upper()}!")
+                    juego_iniciado.set(False)
+                    for btn_viejos in frame_tablero.winfo_children():
+                        btn_viejos.destroy()
+                    for i in range(9):
+                        for j in range(9):
+                            btn_nuevo = tk.Button(frame_tablero, text="", width=4, height=2, bg="gray90")
+                            btn_nuevo.grid(row=i, column=j, padx=1, pady=1)
+                            botones_tablero[i][j] = btn_nuevo
                 
 
 #Funciones de ayuda
@@ -816,6 +847,15 @@ def validar_codigo(correo, codigo_ingresado):
             return usuario
     return None
 
+def avanzar_nivel(caso_multinivel): #Para hacer funcionar el multinivel
+    nivel_actual = caso_multinivel.get()
+    indice_actual = NIVELES.index(nivel_actual)
+    siguiente_indice = (indice_actual + 1) % 3
+    nuevo_nivel = NIVELES[siguiente_indice]
+    caso_multinivel.set(nuevo_nivel)
+    return nuevo_nivel
+    
+
 
 #Ventana de Login
 def iniciar_sesion():
@@ -890,6 +930,7 @@ def iniciar_sesion():
 
 
 
+
 def abrir_menu_principal(nombre_jugador, raiz_oculta):#Creación de ventana
     global ventana
     ventana = raiz_oculta
@@ -949,4 +990,6 @@ def abrir_menu_principal(nombre_jugador, raiz_oculta):#Creación de ventana
 
     ventana.mainloop()
 
-iniciar_sesion()
+# iniciar_sesion()
+raiz_test = tk.Tk()
+abrir_menu_principal("TestUser", raiz_test)
