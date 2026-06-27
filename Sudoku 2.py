@@ -113,7 +113,6 @@ def jugar(): #Función base y pilar de toda la partida
     ventana_jugar.title("Sudoku - Jugar")
     ventana_jugar.geometry("800x600")
 
-    partidas = cargar_partida()
     config = cargar_configuracion()
     nivel = config["nivel"]
 
@@ -175,7 +174,6 @@ def jugar(): #Función base y pilar de toda la partida
     for i in range(9):
         for j in range(9):
             posicion = f"{i},{j}"
-            valor = partidas.get(posicion, 0)
             btn = tk.Button(frame_tablero, text="", width=4, height=2, bg="gray90")
             btn.grid(row=i, column=j)
 
@@ -194,7 +192,7 @@ def jugar(): #Función base y pilar de toda la partida
                             command=lambda: iniciar_juego(nivel, frame_tablero, entry_jugador, juego_iniciado, numero_seleccionado,
                                                           pila_realizadas, pila_eliminadas, tablero, partida_actual, botones_tablero,
                                                           cronometro_activo, cronometro, segundos, elemento_panel, caso_multinivel,
-                                                          contador_jugadas , texto_contador))
+                                                          contador_jugadas , texto_contador, lbl_cronometro))
     btn_iniciar.grid(row=5, column=0, pady=10)
 
 
@@ -392,9 +390,9 @@ def acerca_de():
 #Funciones que ayudan a las principales de antes
 def iniciar_juego(nivel, frame_tablero, entry_jugador, juego_iniciado, numero_seleccionado,
                   pila_realizadas, pila_eliminadas, tablero, partida_actual, botones_tablero, cronometro_activo,
-                  cronometro, segundos, elementos, caso_multinivel, contador_jugadas , texto_contador): #Modificada en Programa 3
+                  cronometro, segundos, elementos, caso_multinivel, contador_jugadas , texto_contador, lbl_cronometro): #Modificada en Programa 3
     
-    nombre = entry_jugador.get()
+    nombre = nombre_jugador_global
     
     if nombre == "":
         messagebox.showwarning("Error", "Debe ingresar un nombre de jugador")
@@ -433,7 +431,7 @@ def iniciar_juego(nivel, frame_tablero, entry_jugador, juego_iniciado, numero_se
             btn.configure(command=lambda f=i, c=j, b=btn: colocar_numero(f, c, b, numero_seleccionado, juego_iniciado, partida_actual, tablero,
                                                                          pila_realizadas, pila_eliminadas, botones_tablero, nombre, nivel,
                                                                          segundos, caso_multinivel, cronometro_activo, frame_tablero,
-                                                                         contador_jugadas , texto_contador))
+                                                                         contador_jugadas , texto_contador, lbl_cronometro))
             btn.grid(row=i, column=j, padx=1, pady=1)
 
         
@@ -457,7 +455,7 @@ def seleccionar_numero(numero, btn_presionado, frame_numeros, num_selec):
 #Como hace el programa para añadir un número a la tabla, junto a sus validaciones (funciones hechas un poco más abajo)
 def colocar_numero(fila, columna, btn, numero_seleccionado, juego_iniciado, partida_actual, tablero, 
                    pila_realizadas, pila_eliminadas, botones_tablero, nombre, nivel, segundos, caso_multinivel, cronometro_activo,
-                   frame_tablero, contador_jugadas, texto_contador): #Modificada en el Programa 3
+                   frame_tablero, contador_jugadas, texto_contador, lbl_cronometro): #Modificada en el Programa 3
 
     if nivel == "multinivel":
         nivel_real = caso_multinivel.get()
@@ -582,10 +580,10 @@ def guardar_juego(juego):
 
 def guardar_partida_actual(tablero, partida_actual, nivel, entry_jugador, juego_iniciado):
     if juego_iniciado.get()==False:
-        messagebox.warning("Error", "EMPIECE UNA PARTIDA PRIMERO")
+        messagebox.showwarning("Error", "EMPIECE UNA PARTIDA PRIMERO")
         return
     
-    nombre = entry_jugador.get()
+    nombre = nombre_jugador_global
     datos = cargar_juego()
     datos[nombre] = {
         "nivel": nivel,
@@ -616,7 +614,7 @@ def cargar_partida_actual(juego_iniciado, entry_jugador, tablero, botones_tabler
         messagebox.showwarning("Error", "DEBE TERMINAR LA PARTIDA ACTUAL PARA CARGAR OTRA")
         return
 
-    nombre = entry_jugador.get()
+    nombre = nombre_jugador_global
     datos = cargar_juego()
         
     if nombre not in datos:
@@ -982,6 +980,8 @@ def validar_elementos_personalizados(texto):
 
 
 def abrir_menu_principal(nombre_jugador, raiz_oculta):#Creación de ventana
+    global nombre_jugador_global
+    nombre_jugador_global = nombre_jugador
     global ventana
     ventana = raiz_oculta
     ventana.deiconify()
@@ -1040,6 +1040,4 @@ def abrir_menu_principal(nombre_jugador, raiz_oculta):#Creación de ventana
 
     ventana.mainloop()
 
-# iniciar_sesion()
-raiz_test = tk.Tk()
-abrir_menu_principal("TestUser", raiz_test)
+iniciar_sesion()
