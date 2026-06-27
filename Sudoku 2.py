@@ -183,21 +183,30 @@ def jugar(): #Función base y pilar de toda la partida
     caso_multinivel = tk.StringVar()
     caso_multinivel.set("facil")
 
+    #Funcionalidad propia del Programa 3
+    contador_jugadas = tk.IntVar()
+    contador_jugadas.set(0)
+    texto_contador = tk.StringVar()
+    texto_contador.set("Jugadas: 0")
+
     #Sección de botones 
     btn_iniciar = tk.Button(frame_derecho, text="INICIAR JUEGO", bg="red", fg="white", font=("Arial", 12, "bold"),
                             command=lambda: iniciar_juego(nivel, frame_tablero, entry_jugador, juego_iniciado, numero_seleccionado,
                                                           pila_realizadas, pila_eliminadas, tablero, partida_actual, botones_tablero,
-                                                          cronometro_activo, cronometro, segundos, elemento_panel, caso_multinivel))
+                                                          cronometro_activo, cronometro, segundos, elemento_panel, caso_multinivel,
+                                                          contador_jugadas , texto_contador))
     btn_iniciar.grid(row=5, column=0, pady=10)
 
 
     btn_deshacer = tk.Button(frame_derecho, text="DESHACER JUGADA", bg="DodgerBlue3", fg="white", font=("Arial", 12, "bold"),
-                            command=lambda: deshacer_jugada(pila_realizadas, pila_eliminadas, tablero, frame_tablero, juego_iniciado, botones_tablero))
+                            command=lambda: deshacer_jugada(pila_realizadas, pila_eliminadas, tablero, frame_tablero, juego_iniciado, botones_tablero,
+                                                            contador_jugadas, texto_contador ))
     btn_deshacer.grid(row=6, column=0, pady=10)
 
     
     btn_rehacer = tk.Button(frame_derecho, text="REHACER JUGADA", bg="lime green", fg="white", font=("Arial", 12, "bold"),
-                            command=lambda: rehacer_jugada(pila_realizadas, pila_eliminadas, tablero, frame_tablero, juego_iniciado, botones_tablero))
+                            command=lambda: rehacer_jugada(pila_realizadas, pila_eliminadas, tablero, frame_tablero, juego_iniciado, botones_tablero,
+                                                           contador_jugadas, texto_contador ))
     btn_rehacer.grid(row=7, column=0, pady=10)
 
 
@@ -229,6 +238,9 @@ def jugar(): #Función base y pilar de toda la partida
 
     lbl_cronometro = tk.Label(frame_derecho, text="00:00:00", font=("Arial", 14, "bold"))
     lbl_cronometro.grid(row=4, column=0, pady=5)
+
+    lbl_contador = tk.Label(frame_derecho, textvariable=texto_contador, font=("Arial", 12))
+    lbl_contador.grid(row=10, column=0, pady=5)
 
     def cronometro():
         if cronometro_activo.get():
@@ -378,9 +390,9 @@ def acerca_de():
 
 
 #Funciones que ayudan a las principales de antes
-def iniciar_juego(nivel, frame_tablero, entry_jugador, juego_iniciado, numero_seleccionado, #Modificada en el Programa 3
+def iniciar_juego(nivel, frame_tablero, entry_jugador, juego_iniciado, numero_seleccionado,
                   pila_realizadas, pila_eliminadas, tablero, partida_actual, botones_tablero, cronometro_activo,
-                  cronometro, segundos, elementos, caso_multinivel):
+                  cronometro, segundos, elementos, caso_multinivel, contador_jugadas , texto_contador): #Modificada en Programa 3
     
     nombre = entry_jugador.get()
     
@@ -420,7 +432,8 @@ def iniciar_juego(nivel, frame_tablero, entry_jugador, juego_iniciado, numero_se
             botones_tablero[i][j] = btn
             btn.configure(command=lambda f=i, c=j, b=btn: colocar_numero(f, c, b, numero_seleccionado, juego_iniciado, partida_actual, tablero,
                                                                          pila_realizadas, pila_eliminadas, botones_tablero, nombre, nivel,
-                                                                         segundos, caso_multinivel, cronometro_activo, frame_tablero))
+                                                                         segundos, caso_multinivel, cronometro_activo, frame_tablero,
+                                                                         contador_jugadas , texto_contador))
             btn.grid(row=i, column=j, padx=1, pady=1)
 
         
@@ -444,7 +457,7 @@ def seleccionar_numero(numero, btn_presionado, frame_numeros, num_selec):
 #Como hace el programa para añadir un número a la tabla, junto a sus validaciones (funciones hechas un poco más abajo)
 def colocar_numero(fila, columna, btn, numero_seleccionado, juego_iniciado, partida_actual, tablero, 
                    pila_realizadas, pila_eliminadas, botones_tablero, nombre, nivel, segundos, caso_multinivel, cronometro_activo,
-                   frame_tablero): #Modificada en el Programa 3
+                   frame_tablero, contador_jugadas, texto_contador): #Modificada en el Programa 3
 
     if nivel == "multinivel":
         nivel_real = caso_multinivel.get()
@@ -483,6 +496,9 @@ def colocar_numero(fila, columna, btn, numero_seleccionado, juego_iniciado, part
             btn.configure(text=str(elemento))
             btn.configure(text=str(elemento), bg="white")
             pila_realizadas.append((fila, columna, elemento))
+            #Funcionalidad propia
+            contador_jugadas.set(contador_jugadas.get() + 1)
+            texto_contador.set(f"Jugadas: {contador_jugadas.get()}")
 
             if all(tablero[i][j] != 0 for i in range(9) for j in range(9)):
                 messagebox.showinfo("¡Felicidades!", "¡EXCELENTE! JUEGO COMPLETADO")
@@ -640,7 +656,7 @@ def cargar_partida():
     else:
         return {}
 
-def deshacer_jugada(pila_realizadas, pila_eliminadas, tablero, frame_tablero, juego_iniciado, botones_tablero):
+def deshacer_jugada(pila_realizadas, pila_eliminadas, tablero, frame_tablero, juego_iniciado, botones_tablero, contador_jugadas, texto_contador ):
     if juego_iniciado.get() == False:
         messagebox.showwarning("Error", "EMPIECE UNA PARTIDA PRIMERO")
 
@@ -657,8 +673,12 @@ def deshacer_jugada(pila_realizadas, pila_eliminadas, tablero, frame_tablero, ju
         btn = botones_tablero[fila][columna]
         btn.configure(text="", bg="gray90")
         pila_eliminadas.append(jugada)
+        
+        #Funcionalidad propia Programa 3
+        contador_jugadas.set(contador_jugadas.get() + 1)
+        texto_contador.set(f"Jugadas: {contador_jugadas.get()}")
 
-def rehacer_jugada(pila_realizadas, pila_eliminadas, tablero, frame_tablero, juego_iniciado, botones_tablero):
+def rehacer_jugada(pila_realizadas, pila_eliminadas, tablero, frame_tablero, juego_iniciado, botones_tablero, contador_jugadas, texto_contador ):
     if juego_iniciado.get() == False:
         messagebox.showwarning("Error", "EMPIECE UNA PARTIDA PRIMERO")
 
@@ -675,6 +695,11 @@ def rehacer_jugada(pila_realizadas, pila_eliminadas, tablero, frame_tablero, jue
         #Buscar el botón en el frame y darle de nuevo el texto
         btn = botones_tablero[fila][columna]
         btn.configure(text=str(elemento), bg="white")
+
+        #Funcionalidad propia Programa 3
+        contador_jugadas.set(contador_jugadas.get() + 1)
+        texto_contador.set(f"Jugadas: {contador_jugadas.get()}")
+
 
 def borrar_juego(pila_realizadas, pila_eliminadas, tablero, frame_tablero, juego_iniciado, partida_actual, botones_tablero):
     if juego_iniciado.get() == False:
