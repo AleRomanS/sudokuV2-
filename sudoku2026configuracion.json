@@ -1,5 +1,5 @@
 {
-    "nivel": "multinivel",
+    "nivel": "facil",
     "reloj": "cronometro",
     "timer": {
         "horas": 0,
@@ -7,6 +7,6 @@
         "segundos": 0
     },
     "top_x": 1,
-    "elementos": "numeros",
-    "elementos_personalizados": ""
+    "elementos": "personalizado",
+    "elementos_personalizados": "?¿¡!#$%&*"
 }

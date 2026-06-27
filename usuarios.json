@@ -12,5 +12,12 @@
         "código_ingreso": "18c3ffe70cd59307dd77b85818fde3d42a384b84cfa8192a10ff2d6e100e4504",
         "nombre": "asd",
         "fecha_creación": "20260625T164650"
+    },
+    {
+        "id": 3,
+        "correo": "asf",
+        "código_ingreso": "33eebea42ae700a3d5025634448164525cc5ff9f94f024bf4945ee9b4bcc23b1",
+        "nombre": "Alejandro",
+        "fecha_creación": "20260627T151628"
     }
 ]
