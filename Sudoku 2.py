@@ -29,7 +29,8 @@ NIVELES=["facil", "intermedio", "dificil", "multinivel"]
 NUMEROS=[1,2,3,4,5,6,7,8,9]
 LETRAS=["A","B","C","D","E","F","G","H","I"]
 
-CONFIG_DEFAULT={"nivel":"facil", "reloj":"cronometro", "timer":{"horas": 0, "minutos": 0, "segundos": 0}, "top_x": 1, "elementos": "numeros"}
+CONFIG_DEFAULT={"nivel":"facil", "reloj":"cronometro", "timer":{"horas": 0, "minutos": 0, "segundos": 0},
+                "top_x": 1, "elementos": "numeros", "elementos_personalizados": ""}
 
 #Programa 3
 #Clases del Programa 3
@@ -161,6 +162,9 @@ def jugar(): #Función base y pilar de toda la partida
         elemento_panel = NUMEROS
     elif config["elementos"] == "letras":
         elemento_panel = LETRAS
+    elif config["elementos"] == "personalizado":
+        print("config completo:", config)
+        elemento_panel = list(config["elementos_personalizados"])
         
     #Creación del panel de juego
     for indx, elem_pan_selec in enumerate(elemento_panel): #Modificada en el Programa 3
@@ -236,7 +240,7 @@ def jugar(): #Función base y pilar de toda la partida
             lbl_cronometro.configure(text=f"{horas:02d}:{minutos:02d}:{segs:02d}")
             ventana_jugar.after(1000, cronometro)
 
-def configurar():
+def configurar(): #Modificada en el Programa 3
     ventana_config = tk.Toplevel(ventana)
     ventana_config.title("Configurar")
     ventana_config.geometry("800x600")
@@ -279,7 +283,7 @@ def configurar():
     entry_topx.insert(0, str(config["top_x"]))
     entry_topx.pack(pady=5)
 
-    #Configuracion de Elementos, o sea elegir entre números o letras
+    #Configuracion de Elementos, o sea elegir entre números o letras o personalizado
     elementos_var = tk.StringVar()
     elementos_var.set(config["elementos"])
 
@@ -287,10 +291,16 @@ def configurar():
     lbl_elementos.pack(pady=5)
     lbl_elementos.configure(bg="gray30", fg="white")
     
-    for opcion in ["numeros", "letras"]:
+    for opcion in ["numeros", "letras", "personalizado"]:
         rb = tk.Radiobutton(ventana_config, text=opcion, variable=elementos_var, value=opcion)
         rb.pack()
         rb.configure(bg="ivory4", fg="white", selectcolor="green4")
+
+    lbl_personalizado = tk.Label(ventana_config, text="Si elige personalizado, escriba 9 símbolos diferentes:")
+    lbl_personalizado.pack(pady=5)
+
+    entry_personalizado = tk.Entry(ventana_config, width=15)
+    entry_personalizado.pack(pady=5)
 
     #Función creada dentro para no tener que mandarle los parametros
     def guardar_config():
@@ -302,13 +312,20 @@ def configurar():
         except ValueError:
             messagebox.showwarning("Error", "El Top X debe ser un número entero")
             return
-    
+
+        if elementos_var.get() == "personalizado":
+            texto_personalizado = entry_personalizado.get()
+            if not validar_elementos_personalizados(texto_personalizado):
+                messagebox.showwarning("Error", "Digite 9 elementos diferentes")
+                return
+            
         nueva_config = {
             "nivel": nivel_var.get(),
             "reloj": reloj_var.get(),
             "timer": config["timer"],
             "top_x": topx,
-            "elementos": elementos_var.get()
+            "elementos": elementos_var.get(),
+            "elementos_personalizados": entry_personalizado.get() if elementos_var.get() == "personalizado" else ""
             }
    
         guardar_configuracion(nueva_config)
@@ -927,6 +944,14 @@ def iniciar_sesion():
                              font=("Arial", 12, "bold"),
                              command=verificar_correo)
     btn_continue.pack(pady=20)
+
+#Valores personalizados
+def validar_elementos_personalizados(texto):
+    if len(texto) != 9:
+        return False
+    if len(set(texto)) != 9:
+        return False
+    return True
 
 
 
